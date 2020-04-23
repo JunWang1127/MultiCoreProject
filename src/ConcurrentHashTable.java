@@ -3,9 +3,9 @@
  */
 public interface ConcurrentHashTable<K, V> {
 
-    public int hash(K key,V value);
+    public int hash(final K key,final V value);
 
-    public Boolean put(V value);
+    public Boolean put(final V value);
 
-    public V get(K key);
+    public V get(final K key);
 }
