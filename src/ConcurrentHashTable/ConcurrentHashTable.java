@@ -1,3 +1,5 @@
+package ConcurrentHashTable;
+
 /**
  * the interface for concurrent hash tables.
  */
@@ -24,7 +26,7 @@ public interface ConcurrentHashTable<K, V> {
 
     /**
      * remove the key-value entry if the key present in map.
-     * @return V is the value of the key.
+     * @return V is the value of the key. If key not exists, return null
      */
      V remove(final K key);
 

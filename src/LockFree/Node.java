@@ -8,7 +8,7 @@ import java.util.concurrent.atomic.AtomicStampedReference;
  */
 public class Node<K, V> {
 
-    public V value;
+    public AtomicStampedReference<V> value; // use stamped to avoid ABA when overwrite the value in map
     public K key;
     public AtomicStampedReference<Node<K, V>> next; // use stamped to avoid ABA
     public AtomicBoolean isDeleted;
@@ -22,7 +22,7 @@ public class Node<K, V> {
     }
 
     public Node(K key, V value) {
-        this.value = value;
+        this.value = new AtomicStampedReference<>(value, 0);
         this.key = key;
         next = new AtomicStampedReference<>(null, 0);
         isDeleted = new AtomicBoolean(false);
