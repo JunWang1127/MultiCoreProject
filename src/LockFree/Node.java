@@ -27,6 +27,6 @@ public class Node<K, V> {
         next = new AtomicStampedReference<>(null, 0);
         isDeleted = new AtomicBoolean(false);
         // the different object may have same value, thus we also has to compare value
-        priority = value.hashCode();
+        priority = key.hashCode();
     }
 }

@@ -6,7 +6,7 @@ public interface ConcurrentHashTable<K, V> {
     /**
      * hash function for the hashMap.
      */
-    int hash(final K key,final V value);
+    int hash(final K key);
 
     /**
      * put key value into map. If already contains key in map,
@@ -18,7 +18,7 @@ public interface ConcurrentHashTable<K, V> {
      V put(final K key, final V value);
 
     /**
-     * get value based on input key
+     * get value based on input key and value.
      */
      V get(final K key);
 

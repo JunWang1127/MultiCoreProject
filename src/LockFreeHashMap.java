@@ -23,18 +23,38 @@ public class LockFreeHashMap<K, V> implements ConcurrentHashTable<K, V> {
     }
 
     @Override
-    public int hash(K key, V value) {
+    public int hash(K key) {
         return key.hashCode() % this.numBuckets;
     }
 
     @Override
     public V put(K key, V value) {
-        int hash = hash(key, value);
+        int hash = hash(key);
         return addNode(key, value, buckets.get(hash));
     }
 
     @Override
     public V get(K key) {
+        int hash = hash(key);
+        Node<K,V> find = buckets.get(hash).next.getReference();
+        int priority = key.hashCode();
+
+        while(find != null){
+            if(priority < find.priority){
+                return null;
+            }
+
+            if(find.key.equals(key)){
+                if(find.isDeleted.get()){
+                    return null;
+                }else{
+                    return find.value;
+                }
+            }
+
+            find = find.next.getReference();
+        }
+
         return null;
     }
 
@@ -65,10 +85,10 @@ public class LockFreeHashMap<K, V> implements ConcurrentHashTable<K, V> {
 
     private V addNode(K key, V value, Node<K, V> head) {
 
-        // the different object may have same value, thus we also has to compare value
-        int priority = value.hashCode();
-
         Node<K, V> node = new Node<>(key, value);
+
+        // the different object may have same value, thus we also has to compare value
+        int priority = node.priority;
 
         while (true) {
             Node<K, V> pre = head;
