@@ -15,10 +15,9 @@ public class LockFreeHashMap<K, V> implements ConcurrentHashTable<K, V> {
     private int numBuckets;
     private volatile AtomicInteger size;
 
-
-    public LockFreeHashMap() {
+    public LockFreeHashMap(int numBuckets) {
         this.size = new AtomicInteger(0);
-        this.numBuckets = 20;
+        this.numBuckets = numBuckets;
         this.buckets = new ArrayList<>();
 
         //initialize the buckets with heads
