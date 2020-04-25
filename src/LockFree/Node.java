@@ -4,6 +4,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicStampedReference;
 
 /**
+ * Jun Wang
  * Entry node for hash map
  */
 public class Node<K, V> {

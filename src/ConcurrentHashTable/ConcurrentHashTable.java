@@ -1,6 +1,10 @@
 package ConcurrentHashTable;
 
+import java.util.Collection;
+import java.util.Set;
+
 /**
+ * Jun Wang
  * the interface for concurrent hash tables.
  */
 public interface ConcurrentHashTable<K, V> {
@@ -41,4 +45,20 @@ public interface ConcurrentHashTable<K, V> {
      boolean isEmpty();
 
      boolean containsKey(final K key);
+
+    /**
+     * get value based on input key and value. If there isn't a key in map,
+     * return default value
+     */
+     V getOrDefault(final K key, final V defaultValue);
+
+    /**
+     * Returns a Set view of the keys contained in this map.
+     */
+    Set<K> keySet();
+
+    /**
+     * Returns a Collection view of the values contained in this map.
+     */
+    Collection<V> values();
 }

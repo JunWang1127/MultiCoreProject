@@ -2,20 +2,23 @@ package LockFree;
 
 import ConcurrentHashTable.ConcurrentHashTable;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * Jun Wang
+ * implementation of lock free concurrent hash map.
+ */
 public class LockFreeHashMap<K, V> implements ConcurrentHashTable<K, V> {
 
-    private List<Node<K, V>> buckets;
+    private volatile List<Node<K, V>> buckets;
     private int numBuckets;
-    private AtomicInteger size;
+    private volatile AtomicInteger size;
 
 
     public LockFreeHashMap() {
         this.size = new AtomicInteger(0);
-        this.numBuckets = 2;
+        this.numBuckets = 20;
         this.buckets = new ArrayList<>();
 
         //initialize the buckets with heads
@@ -33,6 +36,51 @@ public class LockFreeHashMap<K, V> implements ConcurrentHashTable<K, V> {
     public V put(K key, V value) {
         int hash = hash(key);
         return addNode(key, value, buckets.get(hash));
+    }
+
+    private V addNode(K key, V value, Node<K, V> head) {
+        Node<K, V> node = new Node<>(key, value);
+        // the different objects may have same value
+        int priority = node.priority;
+
+        while (true) {
+            Node<K, V> pre = head;
+            // get stamp of pre node's next pointer
+            int stamp = pre.next.getStamp();
+            Node<K, V> successor = pre.next.getReference();
+
+            // find a right position based on priority of key
+            while (successor != null && successor.priority <= priority) {
+
+                // if exist, just overwrite the value of this node
+                if (successor.key.equals(key)) {
+                    while (true) {
+                        int valueStamp = successor.value.getStamp();
+                        V oldValue = successor.value.getReference();
+                        // avoid ABA problem when overwrite value
+                        if (successor.value.compareAndSet(oldValue, value, valueStamp, valueStamp + 1)) {
+                            return oldValue;
+                        }
+                    }
+                }
+
+                pre = successor;
+                stamp = pre.next.getStamp();
+                successor = pre.next.getReference();
+            }
+
+            node.next.set(successor, 0);
+
+            // if pre is not deleted and point to right successor
+            if (!pre.isDeleted.get()) {
+                // use stamped to avoid ABA
+                if (pre.next.compareAndSet(successor, node, stamp, stamp + 1)) {
+                    //update the size of hashMap
+                    this.size.incrementAndGet();
+                    return null;
+                }
+            }
+        }
     }
 
     @Override
@@ -75,13 +123,8 @@ public class LockFreeHashMap<K, V> implements ConcurrentHashTable<K, V> {
             while (successor != null && successor.priority <= priority) {
                 // if exist, remove the node and return the value
                 if (successor.key.equals(key)) {
-                    successor.isDeleted.compareAndSet(false, true);
-                    if (!pre.isDeleted.get()) {
-                        if (pre.next.compareAndSet(successor, successor.next.getReference(), stamp, stamp + 1)) {
-                            this.size.decrementAndGet();
-                            return successor.value.getReference();
-                        }
-                    }
+                    successor.isDeleted.set(true);
+                    break;
                 }
 
                 pre = successor;
@@ -89,7 +132,17 @@ public class LockFreeHashMap<K, V> implements ConcurrentHashTable<K, V> {
                 successor = pre.next.getReference();
             }
 
-            return null;
+            // if didn't find entry
+            if (successor == null || successor.priority > priority) {
+                return null;
+            }
+
+            if (!pre.isDeleted.get()) {
+                if (pre.next.compareAndSet(successor, successor.next.getReference(), stamp, stamp + 1)) {
+                    this.size.decrementAndGet();
+                    return successor.value.getReference();
+                }
+            }
 
         }
     }
@@ -111,19 +164,25 @@ public class LockFreeHashMap<K, V> implements ConcurrentHashTable<K, V> {
                 // if exist, remove the node and return the value
                 if (successor.key.equals(key) && successor.value.getReference().equals(value)) {
                     successor.isDeleted.compareAndSet(false, true);
-                    if (!pre.isDeleted.get()) {
-                        if (pre.next.compareAndSet(successor, successor.next.getReference(), stamp, stamp + 1)) {
-                            this.size.decrementAndGet();
-                            return true;
-                        }
-                    }
+                    break;
                 }
 
                 pre = successor;
                 stamp = pre.next.getStamp();
                 successor = pre.next.getReference();
             }
-            return false;
+
+            // if didn't find entry
+            if (successor == null || successor.priority > priority) {
+                return false;
+            }
+
+            if (!pre.isDeleted.get()) {
+                if (pre.next.compareAndSet(successor, successor.next.getReference(), stamp, stamp + 1)) {
+                    this.size.decrementAndGet();
+                    return true;
+                }
+            }
         }
     }
 
@@ -142,50 +201,44 @@ public class LockFreeHashMap<K, V> implements ConcurrentHashTable<K, V> {
         return get(key) != null;
     }
 
-    private V addNode(K key, V value, Node<K, V> head) {
-        Node<K, V> node = new Node<>(key, value);
-        // the different objects may have same value
-        int priority = node.priority;
+    @Override
+    public V getOrDefault(K key, V defaultValue) {
+        V value = get(key);
+        return value == null ? defaultValue : value;
+    }
 
-        while (true) {
-            Node<K, V> pre = head;
-            // get stamp of pre node's next pointer
-            int stamp = pre.next.getStamp();
-            Node<K, V> successor = pre.next.getReference();
+    @Override
+    public Set<K> keySet() {
+        Set<K> keySet = new HashSet<>();
 
-            // find a right position based on priority of key
-            while (successor != null && successor.priority <= priority) {
-
-                // if exist, just overwrite the value of this node
-                if (successor.key.equals(key) && !successor.isDeleted.get()) {
-                    while (true) {
-                        int valueStamp = successor.value.getStamp();
-                        V oldValue = successor.value.getReference();
-                        // avoid ABA problem when overwrite value
-                        if (successor.value.compareAndSet(oldValue, value, valueStamp, valueStamp + 1)) {
-                            return oldValue;
-                        }
-                    }
-                }
-
-                pre = successor;
-                stamp = pre.next.getStamp();
-                successor = pre.next.getReference();
-            }
-
-            node.next.set(successor, 0);
-
-            // if pre is not deleted and point to right successor
-            if (!pre.isDeleted.get()) {
-                // use stamped to avoid ABA
-                if (pre.next.compareAndSet(successor, node, stamp, stamp + 1)) {
-                    //update the size of hashMap
-                    this.size.incrementAndGet();
-                    return null;
+        for (Node<K, V> bucket : this.buckets) {
+            Node<K, V> iter = bucket.next.getReference();
+            while (iter != null) {
+                if (!iter.isDeleted.get()) {
+                    keySet.add(iter.key);
+                    iter = iter.next.getReference();
                 }
             }
         }
+
+        return keySet;
     }
 
+    @Override
+    public Collection<V> values() {
+        Collection<V> values = new ArrayList<V>();
+
+        for (Node<K, V> bucket : this.buckets) {
+            Node<K, V> iter = bucket.next.getReference();
+            while (iter != null) {
+                if (!iter.isDeleted.get()) {
+                    values.add(iter.value.getReference());
+                    iter = iter.next.getReference();
+                }
+            }
+        }
+
+        return values;
+    }
 
 }
