@@ -37,7 +37,7 @@ public class TestLockFreeHashTable {
     }
 
     @Test
-    public void testLockFreeHashTabletCanPut() {
+    public void testLockFreeHashTableCanPut() {
         concurrentHashTable = new LockFreeHashTable<>(NUM_BUCKET);
         makePutThread(concurrentHashTable);
         Assert.assertEquals(3 * TEST_SIZE, concurrentHashTable.size());

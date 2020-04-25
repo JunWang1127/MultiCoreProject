@@ -36,7 +36,7 @@ public class TestLockBasedHashTable {
     }
 
     @Test
-    public void testCoarseGrainedListSetCanPut() {
+    public void testLockBasedHashTableCanPut() {
         concurrentHashTable = new LockBasedHashTable<>();
         makePutThread(concurrentHashTable);
         Assert.assertEquals(3 * TEST_SIZE, concurrentHashTable.size());
@@ -57,7 +57,7 @@ public class TestLockBasedHashTable {
     }
 
     @Test
-    public void testCoarseGrainedListSetCanRemove() {
+    public void testLockBasedHashTableCanRemove() {
         concurrentHashTable = new LockBasedHashTable<>();
         makeRemoveThread(concurrentHashTable);
         Assert.assertEquals(TEST_SIZE, concurrentHashTable.size());
