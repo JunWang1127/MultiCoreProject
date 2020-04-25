@@ -83,7 +83,7 @@ public class LockBasedHashTable<K, V> implements ConcurrentHashTable<K, V> {
             int index = hashVal & table.length - 1;
             Entry<K, V> first = table[index];
             for (Entry<K, V> e = first; e != null; e = e.next) {
-                if ((e.hash == hashVal) && (key == e.key)) {
+                if ((e.hash == hashVal) && (key.equals(e.key))) {
                     V oldValue = e.value;
                     e.value = value;
                     return oldValue;
@@ -102,7 +102,7 @@ public class LockBasedHashTable<K, V> implements ConcurrentHashTable<K, V> {
         int index = hashVal & table.length - 1;
         Entry<K, V> first = table[index];
         for (Entry<K, V> e = first; e != null; e = e.next) {
-            if ((e.hash == hashVal) && (key == e.key)) {
+            if ((e.hash == hashVal) && (key.equals(e.key))) {
                 V value = e.value;
                 if (value == null) {
                     break;
@@ -125,7 +125,7 @@ public class LockBasedHashTable<K, V> implements ConcurrentHashTable<K, V> {
                 if (e == null) {
                     return null;
                 }
-                if ((e.hash == hashVal) && (key == e.key)) {
+                if ((e.hash == hashVal) && (key.equals(e.key))) {
                     break;
                 }
                 e = e.next;
@@ -153,7 +153,7 @@ public class LockBasedHashTable<K, V> implements ConcurrentHashTable<K, V> {
                 if (e == null) {
                     return false;
                 }
-                if ((e.hash == hashVal) && (key == e.key))  {
+                if ((e.hash == hashVal) && (key.equals(e.key)))  {
                     if (e.value == value) {
                         break;
                     }else {
