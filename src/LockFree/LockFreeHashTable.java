@@ -9,13 +9,13 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Jun Wang
  * implementation of lock free concurrent hash map.
  */
-public class LockFreeHashMap<K, V> implements ConcurrentHashTable<K, V> {
+public class LockFreeHashTable<K, V> implements ConcurrentHashTable<K, V> {
 
     private volatile List<Node<K, V>> buckets;
     private int numBuckets;
     private volatile AtomicInteger size;
 
-    public LockFreeHashMap(int numBuckets) {
+    public LockFreeHashTable(int numBuckets) {
         this.size = new AtomicInteger(0);
         this.numBuckets = numBuckets;
         this.buckets = new ArrayList<>();

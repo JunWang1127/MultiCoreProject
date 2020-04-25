@@ -11,7 +11,7 @@ import java.util.*;
 public class TestPhaseConcurrentHashTable {
 
     private static final int TEST_SIZE = 10000;
-    private static final int NUM_BUCKET = 40000;
+    private static final int NUM_BUCKET = 30010;
 
     private ConcurrentHashTable<Integer, Integer> concurrentHashTable;
     private Integer[] testSet1 = new Integer[TEST_SIZE];

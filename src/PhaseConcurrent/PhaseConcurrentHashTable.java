@@ -5,6 +5,10 @@ import ConcurrentHashTable.ConcurrentHashTable;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
+/**
+ * Jun Wang
+ * implementation of lock free concurrent hash map.
+ */
 public class PhaseConcurrentHashTable<K, V> implements ConcurrentHashTable<K, V> {
 
     private int numSlots;
