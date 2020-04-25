@@ -1,7 +1,7 @@
 package Test;
 
 import ConcurrentHashTable.ConcurrentHashTable;
-import LockFree.LockFreeHashMap;
+import LockFree.LockFreeHashTable;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -11,7 +11,7 @@ import java.util.*;
 public class TestConcurrentHashTable {
 
     private static final int TEST_SIZE = 10000;
-    private static final int NUM_BUCKET = 100;
+    private static final int NUM_BUCKET = 10000;
 
     private ConcurrentHashTable<Integer, Integer> concurrentHashTable;
     private Integer[] testSet1 = new Integer[TEST_SIZE];
@@ -38,7 +38,7 @@ public class TestConcurrentHashTable {
 
     @Test
     public void testCoarseGrainedListSetCanPut() {
-        concurrentHashTable = new LockFreeHashMap<>(NUM_BUCKET);
+        concurrentHashTable = new LockFreeHashTable<>(NUM_BUCKET);
         makePutThread(concurrentHashTable);
         Assert.assertEquals(3 * TEST_SIZE, concurrentHashTable.size());
 
@@ -59,7 +59,7 @@ public class TestConcurrentHashTable {
 
     @Test
     public void testCoarseGrainedListSetCanRemove() {
-        concurrentHashTable = new LockFreeHashMap<>(NUM_BUCKET);
+        concurrentHashTable = new LockFreeHashTable<>(NUM_BUCKET);
         makeRemoveThread(concurrentHashTable);
         Assert.assertEquals(TEST_SIZE, concurrentHashTable.size());
 

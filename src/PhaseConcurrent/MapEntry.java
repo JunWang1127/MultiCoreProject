@@ -1,5 +1,9 @@
 package PhaseConcurrent;
 
+/**
+ * Jun Wang
+ * Map Entry for PhaseConcurrentHashTable
+ */
 public class MapEntry<K,V> {
     public K key;
     public V value;
