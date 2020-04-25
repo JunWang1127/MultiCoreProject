@@ -8,7 +8,7 @@ import org.junit.Test;
 
 import java.util.*;
 
-public class TestConcurrentHashTable {
+public class TestLockFreeHashTable {
 
     private static final int TEST_SIZE = 10000;
     private static final int NUM_BUCKET = 10000;
@@ -37,7 +37,7 @@ public class TestConcurrentHashTable {
     }
 
     @Test
-    public void testCoarseGrainedListSetCanPut() {
+    public void testLockFreeHashTabletCanPut() {
         concurrentHashTable = new LockFreeHashTable<>(NUM_BUCKET);
         makePutThread(concurrentHashTable);
         Assert.assertEquals(3 * TEST_SIZE, concurrentHashTable.size());
@@ -58,7 +58,7 @@ public class TestConcurrentHashTable {
     }
 
     @Test
-    public void testCoarseGrainedListSetCanRemove() {
+    public void testLockFreeHashTableCanRemove() {
         concurrentHashTable = new LockFreeHashTable<>(NUM_BUCKET);
         makeRemoveThread(concurrentHashTable);
         Assert.assertEquals(TEST_SIZE, concurrentHashTable.size());
