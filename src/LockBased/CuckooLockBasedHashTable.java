@@ -4,8 +4,8 @@ import java.util.*;
 import ConcurrentHashTable.ConcurrentHashTable;
 
 public class CuckooLockBasedHashTable<K, V> implements ConcurrentHashTable<K, V> {
-    static int MAXN = 32;
-    static int ver = 2;
+    static int MAXN = 3000;
+    static int ver = 3;
 
     protected static final class Segment {
         protected int count = 0;
@@ -66,11 +66,19 @@ public class CuckooLockBasedHashTable<K, V> implements ConcurrentHashTable<K, V>
     }
 
     public int cuckooHash(int function, K key) {
+        int num = key.hashCode();
+        for (int i = 0; i < function; i++) {
+            num /= MAXN;
+        }
+        return Math.abs(num % MAXN);
+        /**
         switch(function) {
             case 0: return Math.abs(key.hashCode() % MAXN);
             case 1: return Math.abs((key.hashCode() / MAXN) % MAXN);
+            case 2: return Math.abs((key.hashCode() / MAXN / MAXN) % MAXN);
         }
         return Integer.MIN_VALUE;
+         */
     }
 
     private int[] findPos(K key) {
