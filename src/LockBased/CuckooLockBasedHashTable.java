@@ -4,7 +4,7 @@ import java.util.*;
 import ConcurrentHashTable.ConcurrentHashTable;
 
 public class CuckooLockBasedHashTable<K, V> implements ConcurrentHashTable<K, V> {
-    static int MAXN = 3000;
+    private int MAXN = 3000;
     static int ver = 3;
 
     protected static final class Segment {
@@ -51,7 +51,8 @@ public class CuckooLockBasedHashTable<K, V> implements ConcurrentHashTable<K, V>
     private Random r = new Random();
     private int[] counts = new int[ver];
 
-    public CuckooLockBasedHashTable() {
+    public CuckooLockBasedHashTable(int size) {
+        MAXN = size / 3 + 1;
         for (int i = 0; i < ver; i++) {
             counts[i] = 0;
         }

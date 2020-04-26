@@ -1,7 +1,7 @@
 package Test;
 
 import ConcurrentHashTable.ConcurrentHashTable;
-import LockBased.CuckooLockBasedHashTable;
+import LockFree.CuckooLockBasedHashTable;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -11,6 +11,7 @@ import java.util.*;
 public class TestCuckooLockBasedHashTable {
 
     private static final int TEST_SIZE = 10000;
+    private static final int NUM_BUCKET = 10000;
 
     private ConcurrentHashTable<Integer, Integer> concurrentHashTable;
     private Integer[] testSet1 = new Integer[TEST_SIZE];
@@ -37,7 +38,7 @@ public class TestCuckooLockBasedHashTable {
 
     @Test
     public void testCuckooLockBasedHashTableCanPut() {
-        concurrentHashTable = new CuckooLockBasedHashTable<>();
+        concurrentHashTable = new CuckooLockBasedHashTable<>(NUM_BUCKET);
         makePutThread(concurrentHashTable);
         Assert.assertEquals(3 * TEST_SIZE, concurrentHashTable.size());
 
@@ -58,7 +59,7 @@ public class TestCuckooLockBasedHashTable {
 
     @Test
     public void testCuckooLockBasedHashTableCanRemove() {
-        concurrentHashTable = new CuckooLockBasedHashTable<>();
+        concurrentHashTable = new CuckooLockBasedHashTable<>(NUM_BUCKET);
         makeRemoveThread(concurrentHashTable);
         Assert.assertEquals(TEST_SIZE, concurrentHashTable.size());
 
