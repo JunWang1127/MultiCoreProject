@@ -48,8 +48,6 @@ public class LockBasedHashTable<K, V> implements ConcurrentHashTable<K, V> {
             this.value = value;
             return old;
         }
-
-
     }
 
     public final Segment[] segments = new Segment[32];
