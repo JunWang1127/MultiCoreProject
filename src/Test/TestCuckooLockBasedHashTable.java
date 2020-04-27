@@ -1,7 +1,7 @@
 package Test;
 
 import ConcurrentHashTable.ConcurrentHashTable;
-import LockFree.CuckooLockBasedHashTable;
+import LockBased.CuckooLockBasedHashTable;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -11,7 +11,7 @@ import java.util.*;
 public class TestCuckooLockBasedHashTable {
 
     private static final int TEST_SIZE = 10000;
-    private static final int NUM_BUCKET = 10000;
+    private static final int NUM_BUCKET = 20000;
 
     private ConcurrentHashTable<Integer, Integer> concurrentHashTable;
     private Integer[] testSet1 = new Integer[TEST_SIZE];
