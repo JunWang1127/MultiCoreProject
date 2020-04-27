@@ -38,9 +38,16 @@ public class TestLockBasedHashTable {
     @Test
     public void testLockBasedHashTableCanPut() {
         concurrentHashTable = new LockBasedHashTable<>();
+
+        // put three key-value set with overlap concurrently
+        // testSet1 (0~10000) testSet2 (0~20000) testSet3 (0~30000)
         makePutThread(concurrentHashTable);
+
+        // the final size of map will be (30000)
         Assert.assertEquals(3 * TEST_SIZE, concurrentHashTable.size());
 
+
+        // the key, value in set will the same as testSet3
         List<Integer> expectKeys = Arrays.asList(testSet3);
         List<Integer> expectValues = Arrays.asList(testSet3);
 
@@ -59,6 +66,10 @@ public class TestLockBasedHashTable {
     @Test
     public void testLockBasedHashTableCanRemove() {
         concurrentHashTable = new LockBasedHashTable<>();
+        // remove and put operation perform concurrently
+        // remove three key-value set with overlap concurrently. and also put new entry into map at the same time
+        // remove testSet1 (0~10000) testSet2 (0~20000) testSet3 (0~30000)
+        // put testSet4 (30000 ~ 40000)
         makeRemoveThread(concurrentHashTable);
         Assert.assertEquals(TEST_SIZE, concurrentHashTable.size());
 
@@ -79,6 +90,8 @@ public class TestLockBasedHashTable {
     }
 
     private void makePutThread(ConcurrentHashTable<Integer, Integer> table) {
+        // put three key-value set with overlap concurrently
+        // testSet1 (0~10000) testSet2 (0~20000) testSet3 (0~30000)
 
         Thread[] threads = new Thread[3];
         threads[0] = new Thread(new PutThread<Integer, Integer>(testSet1, testSet1, table));
@@ -99,6 +112,10 @@ public class TestLockBasedHashTable {
 
 
     private void makeRemoveThread(ConcurrentHashTable<Integer, Integer> table) {
+        // remove and put operation perform concurrently
+        // remove three key-value set with overlap concurrently. and also put new entry into map at the same time
+        // testSet1 (0~10000) testSet2 (0~20000) testSet3 (0~30000)
+        // testSet4 (30000 ~ 40000)
 
         Thread[] threads = new Thread[4];
         threads[0] = new Thread(new RemoveThread<Integer, Integer>(testSet1, testSet1, table));

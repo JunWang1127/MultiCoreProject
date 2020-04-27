@@ -38,7 +38,10 @@ public class TestPhaseConcurrentHashTable {
     @Test
     public void testPhaseConcurrentHashTableCanPut() {
         concurrentHashTable = new PhaseConcurrentHashTable<>(NUM_BUCKET);
+        // put three key-value set with overlap concurrently
+        // testSet1 (0~10000) testSet2 (0~20000) testSet3 (0~30000)
         makePutThread(concurrentHashTable);
+        // the final size of map will be (30000)
         Assert.assertEquals(3 * TEST_SIZE, concurrentHashTable.size());
 
         List<Integer> expectKeys = Arrays.asList(testSet3);
@@ -57,11 +60,16 @@ public class TestPhaseConcurrentHashTable {
     }
 
     @Test
-    public void testCoarseGrainedListSetCanRemove() throws InterruptedException {
+    public void testPhaseConcurrentHashTableCanRemove() throws InterruptedException {
         concurrentHashTable = new PhaseConcurrentHashTable<>(NUM_BUCKET);
+
+        // remove and put operation perform separately. But thread can put concurrently and remove concurrently
+        // put testSet3 (0~30000) testSet2 (0~20000)
+        // remove testSet1 (0~10000) testSet2 (0~20000)
         makeRemoveThread(concurrentHashTable);
         Assert.assertEquals(TEST_SIZE, concurrentHashTable.size());
 
+        //the map remaining testSet4 (20000 ~ 30000)
         List<Integer> expectKeys = Arrays.asList(testSet4);
         List<Integer> expectValues = Arrays.asList(testSet4);
 
@@ -99,17 +107,25 @@ public class TestPhaseConcurrentHashTable {
 
     private void makeRemoveThread(ConcurrentHashTable<Integer, Integer> table) throws InterruptedException {
 
+        // remove and put operation perform separately. But thread can put concurrently and remove concurrently
+        // put testSet3 (0~30000) testSet2 (0~20000)
+        // remove testSet1 (0~10000) testSet2 (0~20000)
+
         Thread[] threads = new Thread[4];
         threads[0] = new Thread(new PhaseRemoveThread<Integer, Integer>(testSet1, testSet1, table));
         threads[1] = new Thread(new PhaseRemoveThread<Integer, Integer>(testSet2, testSet2, table));
         threads[2] = new Thread(new PutThread<Integer, Integer>(testSet2, testSet2, table));
         threads[3] = new Thread(new PutThread<Integer, Integer>(testSet3, testSet3, table));
+
+        // separate the put and remove operation because this is phase concurrency hash table
+        // put the items concurrently
         threads[3].start();
         threads[2].start();
 
         threads[3].join();
         threads[2].join();
 
+        // remove the items concurrently
         threads[1].start();
         threads[0].start();
 
