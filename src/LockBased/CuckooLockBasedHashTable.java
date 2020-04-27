@@ -5,16 +5,7 @@ import ConcurrentHashTable.ConcurrentHashTable;
 
 public class CuckooLockBasedHashTable<K, V> implements ConcurrentHashTable<K, V> {
     private int MAXN = 3000;
-    static int ver = 3;
-
-    protected static final class Segment {
-        protected int count = 0;
-
-        protected synchronized int getCount() {
-            return this.count;
-        }
-        protected synchronized void synch(){}
-    }
+    private int ver = 5;
 
     static class Entry<K, V> implements Map.Entry<K, V> {
         protected final K key;
@@ -46,18 +37,15 @@ public class CuckooLockBasedHashTable<K, V> implements ConcurrentHashTable<K, V>
         }
     }
 
-    public final Segment[] segments = new Segment[32];
-    protected transient Entry<K, V>[][] table = (Entry<K, V>[][])new Entry[ver][MAXN];
+    protected transient Entry<K, V>[][] table;
     private Random r = new Random();
     private int[] counts = new int[ver];
 
     public CuckooLockBasedHashTable(int size) {
-        MAXN = size / 3 + 1;
+        MAXN = size / ver + 1;// / 3 + 1;
+        table = (Entry<K, V>[][])new Entry[ver][MAXN];
         for (int i = 0; i < ver; i++) {
             counts[i] = 0;
-        }
-        for (int i = 0; i < segments.length; i++) {
-            segments[i] = new Segment();
         }
     }
 
@@ -70,25 +58,19 @@ public class CuckooLockBasedHashTable<K, V> implements ConcurrentHashTable<K, V>
         int num = key.hashCode();
         for (int i = 0; i < function; i++) {
             num /= MAXN;
+            num++;
         }
-        return Math.abs(num % MAXN);
-        /**
-        switch(function) {
-            case 0: return Math.abs(key.hashCode() % MAXN);
-            case 1: return Math.abs((key.hashCode() / MAXN) % MAXN);
-            case 2: return Math.abs((key.hashCode() / MAXN / MAXN) % MAXN);
-        }
-        return Integer.MIN_VALUE;
-         */
+        return Math.abs(num % (MAXN));
     }
 
-    private int[] findPos(K key) {
+    public int[] findPos(K key) {
         for (int i = 0; i < ver; i++) {
-            int pos = cuckooHash(i, key);
-            if (table[i][pos] != null && table[i][pos].key.equals(key)) {
+            int hashVal = cuckooHash(i, key);
+            int index = hashVal % MAXN;
+            if (table[i][index] != null && table[i][index].key.equals(key)) {
                 int[] found = new int[2];
                 found[0] = i;
-                found[1] = pos;
+                found[1] = index;
                 return found;
             }
         }
@@ -99,59 +81,81 @@ public class CuckooLockBasedHashTable<K, V> implements ConcurrentHashTable<K, V>
         if (pos == null) {
             return null;
         }
-        Segment seg = segments[(pos[1] & 0x1F)];
-        synchronized (seg) {
-            V oldValue = table[pos[0]][pos[1]].value;
+        V oldValue = table[pos[0]][pos[1]].value;
+        if (!oldValue.equals(value)) {
             table[pos[0]][pos[1]].value = value;
-            return oldValue;
+            System.out.println("Replacing " + oldValue + " with " + value);
+        }else {
+            System.out.println("Existing " + value);
         }
+        return oldValue;
+    }
+
+    synchronized private void expand() {
+        Entry<K, V>[][] oldTable = table;
+        MAXN = MAXN * 2;
+        table = (Entry<K, V>[][])new Entry[ver][MAXN];
+
+        for (int i = 0; i < ver; i++) {
+            counts[i] = 0;
+            for (int j = 0; j < MAXN / 2; j++) {
+                if (oldTable[i][j] != null) {
+                    insertHelper(oldTable[i][j].key, oldTable[i][j].value);
+                }
+            }
+        }
+
     }
 
 
     public V insertHelper(K key, V value) {
-        final int COUNT_LIMIT = 100;
-        int lastPos = -1;
+        final int COUNT_LIMIT = MAXN;
         K theKey = key;
         V theValue = value;
+
         for (int count = 0; count < COUNT_LIMIT; count++) {
             //Find a position for insert
             for (int i = 0; i < ver; i++) {
                 int hashVal = cuckooHash(i, theKey);
-                Segment seg = segments[(hashVal & 0x1F)];
-                synchronized (seg) {
-                    if (table[i][hashVal] == null) {
-                        Entry<K, V> newEntry = new Entry(hashVal, theKey, theValue);
-                        table[i][hashVal] = newEntry;
-                        counts[i] += 1;
-                        return null;
-                    }
+                int index = hashVal % MAXN;
+                if (table[i][index] == null) {
+                    Entry<K, V> newEntry = new Entry(hashVal, theKey, theValue);
+                    table[i][index] = newEntry;
+                    counts[i] += 1;
+                    System.out.println("Inserted " + theKey + ", " + theValue + " in " + i + ", " + index);
+                    return null;
                 }
             }
             //No available position
             int ran = r.nextInt(ver);
             int hashVal = cuckooHash(ran, theKey);
-            Segment seg = segments[(hashVal & 0x1F)];
-            synchronized (seg) {
-                Entry<K, V> oldEntry = table[ran][hashVal];
-                Entry<K, V> newEntry = new Entry(hashVal, theKey, theValue);
-                table[ran][hashVal] = newEntry;
-                theKey = oldEntry.key;
-                theValue = oldEntry.value;
-            }
+            int index = hashVal % MAXN;
+            Entry<K, V> oldEntry = table[ran][index];
+            table[ran][index] = new Entry(hashVal, theKey, theValue);
+            theKey = oldEntry.key;
+            theValue = oldEntry.value;
         }
-        System.out.println("Unable to find a position. Rehash needed.\n");
-        return theValue;
+        System.out.println(key + " unable to find a position. Expension needed.");
+
+        //Expension
+        expand();
+        System.out.println("Expended. Current MAXN = " + MAXN + "\n");
+        insertHelper(theKey, theValue);
+        return null;
     }
 
 
     @Override
     public V put(final K key, final V value){
-        int[] pos = findPos(key);
-        if (pos != null) {
-            return replace(pos, key, value);
+        System.out.println("\nPutting " + key);
+        synchronized (table) {
+            int[] pos = findPos(key);
+            if (findPos(key) != null) {
+                return replace(pos, key, value);
+            }
+            insertHelper(key, value);
+            return null;
         }
-        insertHelper(key, value);
-        return null;
     }
 
     @Override
@@ -165,33 +169,31 @@ public class CuckooLockBasedHashTable<K, V> implements ConcurrentHashTable<K, V>
 
     @Override
     public V remove(K key) {
-        int[] pos = findPos(key);
-        if (pos != null) {
-            Segment seg = segments[(pos[1] & 0x1F)];
-            synchronized (seg) {
+        synchronized (table) {
+            int[] pos = findPos(key);
+            if (pos != null) {
                 V oldValue = table[pos[0]][pos[1]].value;
                 table[pos[0]][pos[1]] = null;
                 counts[pos[0]] -= 1;
                 return oldValue;
             }
+            return null;
         }
-        return null;
     }
 
     @Override
     public boolean remove(K key, V value){
-        int[] pos = findPos(key);
-        if (pos != null) {
-            Segment seg = segments[(pos[1] & 0x1F)];
-            synchronized (seg) {
+        synchronized (table) {
+            int[] pos = findPos(key);
+            if (pos != null) {
                 if (table[pos[0]][pos[1]].value.equals(value)) {
                     table[pos[0]][pos[1]] = null;
                     counts[pos[0]] -= 1;
                     return true;
                 }
             }
+            return false;
         }
-        return false;
     }
 
     @Override
