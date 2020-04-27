@@ -8,7 +8,7 @@ import java.util.concurrent.atomic.AtomicReference;
 /**
  * Jun Wang
  * implementation of lock free concurrent hash map by PhaseConcurrent method.
- * solve conflict with priority cuckoo
+ * solve conflict with priority probing
  */
 public class PhaseConcurrentHashTable<K, V> implements ConcurrentHashTable<K, V> {
 
