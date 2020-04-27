@@ -100,11 +100,11 @@ public class CuckooLockBasedHashTable<K, V> implements ConcurrentHashTable<K, V>
         // if there was a different value
         if (!oldValue.equals(value)) {
             table[pos[0]][pos[1]].value = value;
-            System.out.println("Replacing " + oldValue + " with " + value);
+            //System.out.println("Replacing " + oldValue + " with " + value);
         }
         // if there was a same value
         else {
-            System.out.println("Existing " + value);
+            //System.out.println("Existing " + value);
         }
         return oldValue;
     }
@@ -143,7 +143,7 @@ public class CuckooLockBasedHashTable<K, V> implements ConcurrentHashTable<K, V>
                     Entry<K, V> newEntry = new Entry(hashVal, theKey, theValue);
                     table[i][index] = newEntry;
                     counts[i] += 1;
-                    System.out.println("Inserted " + theKey + ", " + theValue + " in " + i + ", " + index);
+                    //System.out.println("Inserted " + theKey + ", " + theValue + " in " + i + ", " + index);
                     return null;
                 }
             }
@@ -157,10 +157,10 @@ public class CuckooLockBasedHashTable<K, V> implements ConcurrentHashTable<K, V>
             theValue = oldEntry.value;
         }
         // if count is out of the limit, do rehash
-        System.out.println(key + " unable to find a position. Expension needed.");
+        //System.out.println(key + " unable to find a position. Expension needed.");
         //Expension
         expand();
-        System.out.println("Expended. Current MAXN = " + MAXN + "\n");
+        //System.out.println("Expended. Current MAXN = " + MAXN + "\n");
         // insert the current entry
         insertHelper(theKey, theValue);
         return null;
@@ -169,7 +169,6 @@ public class CuckooLockBasedHashTable<K, V> implements ConcurrentHashTable<K, V>
 
     @Override
     public V put(final K key, final V value){
-        System.out.println("\nPutting " + key);
         synchronized (table) {
             // if there's such a key
             int[] pos = findPos(key);

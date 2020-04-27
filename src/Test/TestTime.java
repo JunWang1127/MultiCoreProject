@@ -1,6 +1,7 @@
 package Test;
 
 import ConcurrentHashTable.ConcurrentHashTable;
+import LockBased.CuckooLockBasedHashTable;
 import LockBased.LockBasedHashTable;
 import LockFree.LockFreeHashTable;
 import PhaseConcurrent.PhaseConcurrentHashTable;
@@ -76,6 +77,7 @@ public class TestTime {
         mapList.add(new PhaseConcurrentHashTable<>(TEST_SIZE+100));
         mapList.add(new LockFreeHashTable<>(TEST_SIZE/10));
         mapList.add(new LockBasedHashTable<>());
+        mapList.add(new CuckooLockBasedHashTable<>(TEST_SIZE+1000));
 
         for(ConcurrentHashTable<String, Integer> table : mapList){
 
@@ -122,6 +124,7 @@ public class TestTime {
         mapList.add(new PhaseConcurrentHashTable<>(TEST_SIZE+100));
         mapList.add(new LockFreeHashTable<>(TEST_SIZE/10));
         mapList.add(new LockBasedHashTable<>());
+        mapList.add(new CuckooLockBasedHashTable<>(TEST_SIZE+100));
 
         // pre put elements into map
         for(ConcurrentHashTable<String, Integer> table : mapList){
@@ -181,6 +184,7 @@ public class TestTime {
         mapList.add(new PhaseConcurrentHashTable<>(TEST_SIZE+100));
         mapList.add(new LockFreeHashTable<>(TEST_SIZE/10));
         mapList.add(new LockBasedHashTable<>());
+        mapList.add(new CuckooLockBasedHashTable<>(TEST_SIZE+1000));
 
         // pre put elements into map
         for(ConcurrentHashTable<String, Integer> table : mapList){
