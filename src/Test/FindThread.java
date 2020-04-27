@@ -2,20 +2,34 @@ package Test;
 
 import ConcurrentHashTable.ConcurrentHashTable;
 
+import java.util.Map;
+
 public class FindThread<K, V> implements Runnable {
 
     private K[] keySet;
     private ConcurrentHashTable<K, V> map;
+    private Map<K, V> sdkMap = null;
 
     FindThread(K[] keySet, ConcurrentHashTable<K, V> map) {
         this.keySet = keySet;
         this.map = map;
     }
 
+    FindThread(K[] keySet, Map<K, V> map) {
+        this.keySet = keySet;
+        this.sdkMap = map;
+    }
+
     @Override
     public void run() {
-        for (int i = 0; i < keySet.length; i++) {
-            map.get(keySet[i]);
+        if(sdkMap == null){
+            for (int i = 0; i < keySet.length; i++) {
+                map.get(keySet[i]);
+            }
+        }else{
+            for (int i = 0; i < keySet.length; i++) {
+                sdkMap.get(keySet[i]);
+            }
         }
     }
 }
