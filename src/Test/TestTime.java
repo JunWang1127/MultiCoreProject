@@ -76,7 +76,7 @@ public class TestTime {
         // because this map using priority probing hash, the slot must bigger than test size
         mapList.add(new PhaseConcurrentHashTable<>(TEST_SIZE+100));
         mapList.add(new LockFreeHashTable<>(TEST_SIZE/10));
-        mapList.add(new LockBasedHashTable<>());
+        mapList.add(new LockBasedHashTable<>(TEST_SIZE/10));
         mapList.add(new CuckooLockBasedHashTable<>(TEST_SIZE+1000));
 
         for(ConcurrentHashTable<String, Integer> table : mapList){
@@ -123,7 +123,7 @@ public class TestTime {
         // because this map using priority probing hash, the slot must bigger than test size
         mapList.add(new PhaseConcurrentHashTable<>(TEST_SIZE+100));
         mapList.add(new LockFreeHashTable<>(TEST_SIZE/10));
-        mapList.add(new LockBasedHashTable<>());
+        mapList.add(new LockBasedHashTable<>(TEST_SIZE/10));
         mapList.add(new CuckooLockBasedHashTable<>(TEST_SIZE+100));
 
         // pre put elements into map
@@ -183,7 +183,7 @@ public class TestTime {
         // because this map using priority probing hash, the slot must bigger than test size
         mapList.add(new PhaseConcurrentHashTable<>(TEST_SIZE+100));
         mapList.add(new LockFreeHashTable<>(TEST_SIZE/10));
-        mapList.add(new LockBasedHashTable<>());
+        mapList.add(new LockBasedHashTable<>(TEST_SIZE/10));
         mapList.add(new CuckooLockBasedHashTable<>(TEST_SIZE+1000));
 
         // pre put elements into map
