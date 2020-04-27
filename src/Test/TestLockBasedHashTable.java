@@ -11,6 +11,8 @@ import java.util.*;
 public class TestLockBasedHashTable {
 
     private static final int TEST_SIZE = 10000;
+    private static final int NUM_BUCKET = 10000;
+
 
     private ConcurrentHashTable<Integer, Integer> concurrentHashTable;
     private Integer[] testSet1 = new Integer[TEST_SIZE];
@@ -37,7 +39,7 @@ public class TestLockBasedHashTable {
 
     @Test
     public void testLockBasedHashTableCanPut() {
-        concurrentHashTable = new LockBasedHashTable<>();
+        concurrentHashTable = new LockBasedHashTable<>(NUM_BUCKET);
 
         // put three key-value set with overlap concurrently
         // testSet1 (0~10000) testSet2 (0~20000) testSet3 (0~30000)
@@ -65,7 +67,7 @@ public class TestLockBasedHashTable {
 
     @Test
     public void testLockBasedHashTableCanRemove() {
-        concurrentHashTable = new LockBasedHashTable<>();
+        concurrentHashTable = new LockBasedHashTable<>(NUM_BUCKET);
         // remove and put operation perform concurrently
         // remove three key-value set with overlap concurrently. and also put new entry into map at the same time
         // remove testSet1 (0~10000) testSet2 (0~20000) testSet3 (0~30000)

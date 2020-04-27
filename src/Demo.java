@@ -6,7 +6,7 @@ public class Demo {
     public static void main(String[] args) {
 
         //ConcurrentHashTable<String, String> c = new LockFreeHashMap<>();
-        ConcurrentHashTable<String, String> c = new CuckooLockBasedHashTable<>(32);
+        ConcurrentHashTable<String, String> c = new LockBasedHashTable<>(100);
         boolean b_empty = c.isEmpty();
         c.put("jun","123");
         c.put("jun","321");
