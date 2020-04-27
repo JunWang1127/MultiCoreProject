@@ -7,7 +7,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Jun Wang
- * implementation of lock free concurrent hash map.
+ * implementation of lock free concurrent hash map by lock free method.
+ * solve conflict with priority chain
  */
 public class LockFreeHashTable<K, V> implements ConcurrentHashTable<K, V> {
 

@@ -7,7 +7,8 @@ import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Jun Wang
- * implementation of lock free concurrent hash map.
+ * implementation of lock free concurrent hash map by PhaseConcurrent method.
+ * solve conflict with priority cuckoo
  */
 public class PhaseConcurrentHashTable<K, V> implements ConcurrentHashTable<K, V> {
 
@@ -38,15 +39,20 @@ public class PhaseConcurrentHashTable<K, V> implements ConcurrentHashTable<K, V>
             MapEntry<K, V> iter = table.get(index).get();
 
             if (iter == null) {
+                // if the slot is not occupied, insert new entry
                 table.get(index).compareAndSet(null, entry);
                 return entry.value;
             } else if (iter.key.equals(entry.key)) {
+                // if there is a duplicate key, replace old value by new value
                 if(table.get(index).compareAndSet(iter,entry)){
                     return iter.value;
                 }
             } else if (iter.priority < entry.priority) {
+                // if the slot was occupied and the priority of insert entry is lower, find next slot.
                 index++;
             } else if (table.get(index).compareAndSet(iter, entry)) {
+                // if the slot was occupied and the priority of insert entry is higher,
+                // kick out the old entry by new entry and reinsert old entry.
                 entry = iter;
                 index++;
             }
@@ -61,12 +67,15 @@ public class PhaseConcurrentHashTable<K, V> implements ConcurrentHashTable<K, V>
         while(index < numSlots){
             MapEntry<K,V> entry = table.get(index).get();
             if(entry == null || entry.priority > key.hashCode()){
+                // if current entry's priority is lower, that means the key is not in the map
                 return null;
             }
 
             if(entry.key.equals(key)){
                 return entry.value;
             }
+
+            // if current entry's priority is higher, find next
             index++;
         }
 
@@ -80,14 +89,17 @@ public class PhaseConcurrentHashTable<K, V> implements ConcurrentHashTable<K, V>
         while(index < numSlots){
             MapEntry<K,V> entry = table.get(index).get();
             if(entry == null || entry.priority > key.hashCode()){
+                // if current entry's priority is lower, that means the key is not in the map
                 return null;
             }
 
             if(entry.key.equals(key)){
                 if(table.get(index).compareAndSet(entry, null)){
+                    // if found the key, remove it
                     return entry.value;
                 }
             }else {
+                // if current entry's priority is higher, find next
                 index++;
             }
         }
