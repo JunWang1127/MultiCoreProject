@@ -3,6 +3,12 @@ package LockBased;
 import java.util.*;
 import ConcurrentHashTable.ConcurrentHashTable;
 
+/**
+ * Xiyu Wang
+ * implementation of lock based concurrent hash map by segment synchronize.
+ * solve conflict with priority chain
+ */
+
 public class LockBasedHashTable<K, V> implements ConcurrentHashTable<K, V> {
 
     protected static final class Segment {
@@ -77,16 +83,19 @@ public class LockBasedHashTable<K, V> implements ConcurrentHashTable<K, V> {
     public V put(final K key, final V value){
         int hashVal = hash(key);
         Segment seg = segments[(hashVal & 0x1F)];
+        //lock the segment
         synchronized (seg) {
             int index = hashVal & table.length - 1;
             Entry<K, V> first = table[index];
             for (Entry<K, V> e = first; e != null; e = e.next) {
+                // if there already exists the key, replace the value and return the old value
                 if ((e.hash == hashVal) && (key.equals(e.key))) {
                     V oldValue = e.value;
                     e.value = value;
                     return oldValue;
                 }
             }
+            // if there's no existing key, insert a new entry and count it
             Entry<K, V> newEntry = new Entry(hashVal, key, value, first);
             table[index] = newEntry;
             seg.count += 1;
@@ -99,6 +108,7 @@ public class LockBasedHashTable<K, V> implements ConcurrentHashTable<K, V> {
         int hashVal = hash(key);
         int index = hashVal & table.length - 1;
         Entry<K, V> first = table[index];
+        // From the head entry, look it up through the chain until find the key or reach the end
         for (Entry<K, V> e = first; e != null; e = e.next) {
             if ((e.hash == hashVal) && (key.equals(e.key))) {
                 V value = e.value;
@@ -115,25 +125,31 @@ public class LockBasedHashTable<K, V> implements ConcurrentHashTable<K, V> {
     public V remove(K key) {
         int hashVal = hash(key);
         Segment seg = segments[(hashVal & 0x1F)];
+        // lock the segment
         synchronized (seg) {
             int index = hashVal & table.length - 1;
             Entry<K, V> first = table[index];
             Entry<K, V> e = first;
             while (true) {
+                // if there's no entry under the index
                 if (e == null) {
                     return null;
                 }
+                // if the target key is found
                 if ((e.hash == hashVal) && (key.equals(e.key))) {
                     break;
                 }
+                // else, keep looking up through the chain
                 e = e.next;
             }
+            //if the target key is found, append all the rest to the head of the chain
             V oldValue = e.value;
             Entry<K, V> head = e.next;
             for (Entry<K, V> p = first; p != e; p = p.next) {
                 head = new Entry<K, V>(p.hash, p.key, p.value, head);
             }
             table[index] = head;
+            // the old entry is gone, remove it in the count
             seg.count -= 1;
             return oldValue;
         }
@@ -143,25 +159,30 @@ public class LockBasedHashTable<K, V> implements ConcurrentHashTable<K, V> {
     public boolean remove(K key, V value){
         int hashVal = hash(key);
         Segment seg = segments[(hashVal & 0x1F)];
+        // lock the segment
         synchronized (seg) {
             int index = hashVal & table.length - 1;
             Entry<K, V> first = table[index];
             Entry<K, V> e = first;
             while (true) {
+                // if there's no entry under the index
                 if (e == null) {
                     return false;
                 }
+                // if the target key is found
                 if ((e.hash == hashVal) && (key.equals(e.key)))  {
+                    // if it's the right value or not
                     if (e.value == value) {
                         break;
                     }else {
                         return false;
                     }
                 }
+                // keep looking through the chain till the end
                 e = e.next;
 
             }
-            //V oldValue = e.value;
+            // Similar, but do not have to save the oldvalue for return
             Entry<K, V> head = e.next;
             for (Entry<K, V> p = first; p != e; p = p.next) {
                 head = new Entry<K, V>(p.hash, p.key, p.value, head);
@@ -174,6 +195,7 @@ public class LockBasedHashTable<K, V> implements ConcurrentHashTable<K, V> {
 
     @Override
     public int size(){
+        // there are counts in the segments, just add them up
         int c = 0;
         for (int i = 0; i < segments.length; i++) {
             c += segments[i].count;
