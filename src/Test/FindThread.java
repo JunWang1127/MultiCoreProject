@@ -10,12 +10,12 @@ public class FindThread<K, V> implements Runnable {
     private ConcurrentHashTable<K, V> map;
     private Map<K, V> sdkMap = null;
 
-    FindThread(K[] keySet, ConcurrentHashTable<K, V> map) {
+    public FindThread(K[] keySet, ConcurrentHashTable<K, V> map) {
         this.keySet = keySet;
         this.map = map;
     }
 
-    FindThread(K[] keySet, Map<K, V> map) {
+    public FindThread(K[] keySet, Map<K, V> map) {
         this.keySet = keySet;
         this.sdkMap = map;
     }

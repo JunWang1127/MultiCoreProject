@@ -241,4 +241,25 @@ public class LockFreeHashTable<K, V> implements ConcurrentHashTable<K, V> {
         return values;
     }
 
+    public String toString(){
+
+        StringBuilder sb = new StringBuilder();
+
+        for (Node<K, V> bucket : this.buckets) {
+            Node<K, V> iter = bucket.next.getReference();
+            while (iter != null) {
+                if (!iter.isDeleted.get()) {
+                    sb.append("[");
+                    sb.append("Key: ").append(iter.key);
+                    sb.append(" value: ").append(iter.value.getReference());
+                    sb.append("] ");
+                    iter = iter.next.getReference();
+                }
+            }
+        }
+
+        return sb.toString();
+
+    }
+
 }

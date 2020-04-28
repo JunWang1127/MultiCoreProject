@@ -11,13 +11,13 @@ public class PhaseRemoveThread<K, V> implements Runnable {
     private ConcurrentHashTable<K, V> map;
     private Map<K, V> sdkMap = null;
 
-    PhaseRemoveThread(K[] keySet, V[] valueSet, ConcurrentHashTable<K, V> map) {
+    public PhaseRemoveThread(K[] keySet, V[] valueSet, ConcurrentHashTable<K, V> map) {
         this.keySet = keySet;
         this.valueSet = valueSet;
         this.map = map;
     }
 
-    PhaseRemoveThread(K[] keySet, V[] valueSet, Map<K, V> map) {
+    public PhaseRemoveThread(K[] keySet, V[] valueSet, Map<K, V> map) {
         this.keySet = keySet;
         this.valueSet = valueSet;
         this.sdkMap = map;

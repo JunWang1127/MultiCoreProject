@@ -8,7 +8,7 @@ public class RemoveThread<K, V> implements Runnable {
     private V[] valueSet;
     private ConcurrentHashTable<K, V> map;
 
-    RemoveThread(K[] keySet, V[] valueSet, ConcurrentHashTable<K, V> map) {
+    public RemoveThread(K[] keySet, V[] valueSet, ConcurrentHashTable<K, V> map) {
         this.keySet = keySet;
         this.valueSet = valueSet;
         this.map = map;
