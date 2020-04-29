@@ -1,5 +1,5 @@
 # MultiCoreProject
-## Team Members: Jun WanG, Xiyu Wang
+## Team Members: Jun Wang, Xiyu Wang
 
 ## plot
 this folder contains the plot image of the run time experiment results.
@@ -35,8 +35,9 @@ this package contains implementation of another of lock-free hash table that usi
 
 ## Test
 This package contains unit test and an TestTime class for comparing the performance between Java JDK concurrent map and our tables
+
 1.**[FindThread.java](src/Test/FindThread.java), [PhaseRemoveThread.java](src/Test/PhaseRemoveThread.java), [PutThread.java](src/Test/PutThread.java), [RemoveThread.java](src/Test/RemoveThread.java)**
-is the threads classes for test table in concurrent environment. Each thread will have it own operation. The put thread will put a set of entry into table
+are the threads classes for test table in concurrent environment. Each thread will have it own operation. The put thread will put a set of entry into table
 , The Remove thread will put a set of entries first and then remove them from table. The Phase Remove just remove a set of entries from table. Find Thread will find entries.
 
 2.**[TestCuckooLockBasedHashTable.java](src/Test/TestCuckooLockBasedHashTable.java), [TestLockBasedHashTable.java](src/Test/TestLockBasedHashTable.java)**
